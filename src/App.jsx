@@ -16,14 +16,14 @@ function App() {
             </span>{' '}
             Booking
           </h1>
-          <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed">
-            Secure your property's safety with our certified inspection services. Fast, reliable, and fully compliant.
+          <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed subheader">
+            Secure your property's safety with our certified inspection services.
           </p>
         </div>
 
         <BookingForm />
 
-        <footer className="text-center text-sm text-slate-500 font-medium">
+        <footer className="text-center text-sm text-slate-500 font-medium copyright-text">
           &copy; {new Date().getFullYear()} TSHUA Property Investments LTD. All rights reserved.
         </footer>
       </div>

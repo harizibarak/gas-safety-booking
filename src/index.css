@@ -50,7 +50,10 @@ body {
 }
 
 /* Typography */
-h1,
+h1 {
+  padding: 0rem 0.5rem 0rem 0.5rem;
+}
+
 h2,
 h3,
 h4,
@@ -78,6 +81,14 @@ p {
 }
 
 /* Utilities */
+.copyright-text {
+  margin-top: 0.5rem;
+}
+
+.subheader {
+  margin-bottom: 0.2rem;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;

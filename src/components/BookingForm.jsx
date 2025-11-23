@@ -2,6 +2,7 @@ import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCheckCircle } from 'react-icons/fa';
+import { supabase } from '../lib/supabaseClient';
 
 export default function BookingForm() {
     const [formData, setFormData] = useState({
@@ -60,12 +61,31 @@ export default function BookingForm() {
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .insert([
+                    {
+                        expiry_date: formData.expiryDate,
+                        address: formData.address,
+                        client_email: formData.clientEmail,
+                        has_tenant: formData.hasTenant,
+                        tenant_name: formData.hasTenant ? formData.tenantName : null,
+                        tenant_phone: formData.hasTenant ? formData.tenantPhone : null,
+                        tenant_email: formData.hasTenant ? formData.tenantEmail : null
+                    }
+                ]);
 
-        setIsSubmitting(false);
-        setIsSuccess(true);
-        console.log('Form submitted:', formData);
+            if (error) throw error;
+
+            setIsSuccess(true);
+            console.log('Form submitted successfully');
+        } catch (error) {
+            console.error('Error submitting booking:', error);
+            alert('Failed to submit booking. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isSuccess) {
