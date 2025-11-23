@@ -24,7 +24,7 @@ function App() {
         <BookingForm />
 
         <footer className="text-center text-sm text-slate-500 font-medium">
-          &copy; {new Date().getFullYear()} Gas Safety Services UK. All rights reserved.
+          &copy; {new Date().getFullYear()} TSHUA Property Investments LTD. All rights reserved.
         </footer>
       </div>
     </div>

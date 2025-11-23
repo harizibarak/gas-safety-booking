@@ -161,7 +161,7 @@ export default function BookingForm() {
                 </div>
 
                 {/* Tenant Details Toggle */}
-                <div className="bg-slate-800/40 p-6 rounded-xl border border-white/5 hover:bg-slate-800/60 transition-colors mt-10">
+                <div className="tenant-toggle">
                     <label className="flex items-center justify-between cursor-pointer select-none">
                         <span className="text-sm font-medium text-slate-200">Is there a tenant currently in the property?</span>
                         <div className="relative">
@@ -180,7 +180,7 @@ export default function BookingForm() {
 
                 {/* Tenant Details Section */}
                 {formData.hasTenant && (
-                    <div className="pl-6 border-l-2 border-sky-500/30 ml-2 space-y-8 fade-in pt-4 pb-2">
+                    <div className="pl-6 border-sky-500/30 ml-2 space-y-8 fade-in pt-4 pb-2">
                         <h3 className="text-xs uppercase tracking-widest font-bold text-sky-400 mb-4">Tenant Details</h3>
 
                         <div className="relative">
@@ -236,7 +236,7 @@ export default function BookingForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`btn btn-primary w-full py-4 text-lg shadow-lg shadow-sky-500/20 mt-10 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`btn btn-primary w-full py-4 text-lg shadow-lg shadow-sky-500/20 mt-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                     {isSubmitting ? (
                         <span className="flex items-center">
