@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { logout } from '../lib/auth';
 
 export default function AdminDashboard() {
+    const navigate = useNavigate();
     const [leads, setLeads] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -10,6 +13,11 @@ export default function AdminDashboard() {
     const [isApplying, setIsApplying] = useState(false);
     const [glowingLeads, setGlowingLeads] = useState(new Set());
     const quoteInputRef = useRef(null);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
     useEffect(() => {
         fetchData();
@@ -109,7 +117,16 @@ export default function AdminDashboard() {
 
     return (
         <div className="container mx-auto py-12 px-6 lg:px-8">
-            <h2 className="text-4xl font-bold text-white mb-12 text-center">Admin Dashboard</h2>
+            <div className="flex justify-between items-center mb-12">
+                <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
+                <button
+                    onClick={handleLogout}
+                    className="btn btn-primary text-sm px-4 py-2"
+                    style={{ marginTop: 0 }}
+                >
+                    Logout
+                </button>
+            </div>
 
             <div className="space-y-12">
                 {/* Leads Section */}
