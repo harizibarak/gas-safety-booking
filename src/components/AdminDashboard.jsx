@@ -5,6 +5,9 @@ export default function AdminDashboard() {
     const [leads, setLeads] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedLeads, setSelectedLeads] = useState([]);
+    const [batchQuote, setBatchQuote] = useState('');
+    const [isApplying, setIsApplying] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -12,15 +15,29 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            const { data, error } = await supabase
-                .from('bookings')
+            // Fetch leads
+            const { data: leadsData, error: leadsError } = await supabase
+                .from('leads')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (leadsError) throw leadsError;
 
-            const leadsData = data.filter(item => item.status === 'lead');
-            const bookingsData = data.filter(item => item.status === 'confirmed');
+            // Fetch confirmed bookings with lead details
+            const { data: bookingsData, error: bookingsError } = await supabase
+                .from('confirmed_bookings')
+                .select(`
+                    *,
+                    leads (
+                        address,
+                        client_email,
+                        expiry_date,
+                        quoted_price
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (bookingsError) throw bookingsError;
 
             setLeads(leadsData);
             setBookings(bookingsData);
@@ -37,6 +54,48 @@ export default function AdminDashboard() {
         alert('Booking link copied to clipboard!');
     };
 
+    const toggleLeadSelection = (id) => {
+        setSelectedLeads(prev =>
+            prev.includes(id) ? prev.filter(leadId => leadId !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedLeads.length === leads.length) {
+            setSelectedLeads([]);
+        } else {
+            setSelectedLeads(leads.map(lead => lead.id));
+        }
+    };
+
+    const applyBatchQuote = async () => {
+        if (!batchQuote || selectedLeads.length === 0) {
+            alert('Please enter a quote and select at least one lead.');
+            return;
+        }
+
+        setIsApplying(true);
+
+        try {
+            const { error } = await supabase
+                .from('leads')
+                .update({ quoted_price: parseFloat(batchQuote) })
+                .in('id', selectedLeads);
+
+            if (error) throw error;
+
+            alert(`Quote of £${batchQuote} applied to ${selectedLeads.length} lead(s)`);
+            setSelectedLeads([]);
+            setBatchQuote('');
+            fetchData(); // Refresh data
+        } catch (error) {
+            console.error('Error applying batch quote:', error);
+            alert('Failed to apply quote. Please try again.');
+        } finally {
+            setIsApplying(false);
+        }
+    };
+
     if (loading) return <div className="text-white text-center py-20">Loading...</div>;
 
     return (
@@ -47,25 +106,74 @@ export default function AdminDashboard() {
                 {/* Leads Section */}
                 <section className="flex flex-col gap-2">
                     <h3 className="text-2xl font-semibold text-sky-400">Leads ({leads.length})</h3>
+                    
+                    {/* Batch Quote Section */}
+                    {leads.length > 0 && (
+                        <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 mb-4">
+                            <h4 className="text-lg font-semibold text-white mb-4">Batch Quote</h4>
+                            <div className="flex items-end gap-4">
+                                <div className="flex-1">
+                                    <label className="label">Quote Price (£)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={batchQuote}
+                                        onChange={(e) => setBatchQuote(e.target.value)}
+                                        placeholder="e.g. 75.00"
+                                        className="input"
+                                    />
+                                </div>
+                                <button
+                                    onClick={applyBatchQuote}
+                                    disabled={isApplying || selectedLeads.length === 0}
+                                    className={`btn btn-primary ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="rounded-md border border-slate-700 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm text-slate-400">
                                 <thead className="bg-slate-800 text-slate-200 uppercase font-medium">
                                     <tr>
+                                        <th className="px-6 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedLeads.length === leads.length && leads.length > 0}
+                                                onChange={toggleSelectAll}
+                                                className="w-4 h-4 cursor-pointer"
+                                            />
+                                        </th>
                                         <th className="px-6 py-4">Date</th>
                                         <th className="px-6 py-4">Email</th>
                                         <th className="px-6 py-4">Address</th>
                                         <th className="px-6 py-4">Expiry</th>
+                                        <th className="px-6 py-4">Quote</th>
                                         <th className="px-6 py-4">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
                                     {leads.map((lead) => (
                                         <tr key={lead.id} className="hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedLeads.includes(lead.id)}
+                                                    onChange={() => toggleLeadSelection(lead.id)}
+                                                    className="w-4 h-4 cursor-pointer"
+                                                />
+                                            </td>
                                             <td className="px-6 py-4">{new Date(lead.created_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 text-white">{lead.client_email}</td>
                                             <td className="px-6 py-4">{lead.address}</td>
                                             <td className="px-6 py-4">{lead.expiry_date}</td>
+                                            <td className="px-6 py-4">
+                                                {lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : '-'}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <button
                                                     onClick={() => copyLink(lead.id)}
@@ -78,7 +186,7 @@ export default function AdminDashboard() {
                                     ))}
                                     {leads.length === 0 && (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-8 text-center text-slate-500">No leads found.</td>
+                                            <td colSpan="7" className="px-6 py-8 text-center text-slate-500">No leads found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -106,12 +214,12 @@ export default function AdminDashboard() {
                                     {bookings.map((booking) => (
                                         <tr key={booking.id} className="hover:bg-slate-800/50 transition-colors">
                                             <td className="px-6 py-4">{new Date(booking.created_at).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 text-white">{booking.client_email}</td>
-                                            <td className="px-6 py-4">{booking.address}</td>
-                                            <td className="px-6 py-4">{booking.tenant_name || '-'}</td>
+                                            <td className="px-6 py-4 text-white">{booking.leads?.client_email || '-'}</td>
+                                            <td className="px-6 py-4">{booking.leads?.address || '-'}</td>
+                                            <td className="px-6 py-4">{booking.contact_name || '-'}</td>
                                             <td className="px-6 py-4">
-                                                {booking.tenant_phone && <div>{booking.tenant_phone}</div>}
-                                                {booking.tenant_email && <div>{booking.tenant_email}</div>}
+                                                {booking.contact_phone && <div>{booking.contact_phone}</div>}
+                                                {booking.contact_email && <div>{booking.contact_email}</div>}
                                             </td>
                                         </tr>
                                     ))}

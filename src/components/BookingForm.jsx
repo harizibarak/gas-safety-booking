@@ -55,13 +55,12 @@ export default function BookingForm() {
 
         try {
             const { error } = await supabase
-                .from('bookings')
+                .from('leads')
                 .insert([
                     {
                         expiry_date: formData.expiryDate,
                         address: formData.address,
-                        client_email: formData.clientEmail,
-                        status: 'lead'
+                        client_email: formData.clientEmail
                     }
                 ]);
 

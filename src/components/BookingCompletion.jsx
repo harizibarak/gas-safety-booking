@@ -9,9 +9,9 @@ export default function BookingCompletion() {
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(null);
     const [formData, setFormData] = useState({
-        tenantName: '',
-        tenantPhone: '',
-        tenantEmail: ''
+        contactName: '',
+        contactPhone: '',
+        contactEmail: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -29,17 +29,28 @@ export default function BookingCompletion() {
 
     const fetchBooking = async () => {
         try {
-            const { data, error } = await supabase
-                .from('bookings')
+            // Fetch lead details
+            const { data: leadData, error: leadError } = await supabase
+                .from('leads')
                 .select('*')
                 .eq('id', id)
                 .single();
 
-            if (error) throw error;
-            if (data.status === 'confirmed') {
+            if (leadError) throw leadError;
+
+            // Check if already confirmed
+            const { data: confirmedData, error: confirmedError } = await supabase
+                .from('confirmed_bookings')
+                .select('id')
+                .eq('lead_id', id)
+                .maybeSingle();
+
+            if (confirmedError && confirmedError.code !== 'PGRST116') throw confirmedError;
+
+            if (confirmedData) {
                 setIsSuccess(true); // Already confirmed
             }
-            setBooking(data);
+            setBooking(leadData);
         } catch (error) {
             console.error('Error fetching booking:', error);
             alert('Invalid booking link.');
@@ -56,8 +67,8 @@ export default function BookingCompletion() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.tenantName.trim()) {
-            alert('Tenant Name is required');
+        if (!formData.contactName.trim()) {
+            alert('Contact Name is required');
             return;
         }
 
@@ -65,14 +76,15 @@ export default function BookingCompletion() {
 
         try {
             const { error } = await supabase
-                .from('bookings')
-                .update({
-                    tenant_name: formData.tenantName,
-                    tenant_phone: formData.tenantPhone,
-                    tenant_email: formData.tenantEmail,
-                    status: 'confirmed'
-                })
-                .eq('id', id);
+                .from('confirmed_bookings')
+                .insert([
+                    {
+                        lead_id: id,
+                        contact_name: formData.contactName,
+                        contact_phone: formData.contactPhone,
+                        contact_email: formData.contactEmail
+                    }
+                ]);
 
             if (error) throw error;
 
@@ -90,13 +102,13 @@ export default function BookingCompletion() {
     if (isSuccess) {
         return (
             <div className="min-h-screen flex items-center justify-center px-4">
-                <div className="card fade-in text-center py-16 max-w-lg w-full">
+                <div className="card fade-in flex flex-col items-center justify-center text-center py-16 max-w-lg w-full">
                     <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                         <FaCheckCircle className="w-12 h-12 text-green-500" />
                     </div>
                     <h2 className="text-3xl font-bold mb-4 text-white">Booking Confirmed!</h2>
                     <p className="text-slate-400 mb-8 text-lg">
-                        Thank you. We have received the tenant details and will proceed with the arrangement.
+                        Thank you. We have received the contact details and will proceed with the arrangement.
                     </p>
                     <button onClick={() => navigate('/')} className="btn btn-primary">
                         Return Home
@@ -113,7 +125,7 @@ export default function BookingCompletion() {
 
                 <div className="mb-8 text-center">
                     <h2 className="text-2xl font-bold mb-2 text-white">Complete Your Booking</h2>
-                    <p className="text-slate-400">Please provide contact details for the tenant or access contact.</p>
+                    <p className="text-slate-400">Please provide contact details for access to the property.</p>
                 </div>
 
                 <div className="relative">
@@ -127,14 +139,27 @@ export default function BookingCompletion() {
                     />
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {booking.quoted_price && (
                     <div className="relative">
-                        <label htmlFor="tenantName" className="label">Contact Name (Tenant/Agent)</label>
+                        <label htmlFor="quotedPrice" className="label">Quoted Price</label>
                         <input
                             type="text"
-                            id="tenantName"
-                            name="tenantName"
-                            value={formData.tenantName}
+                            id="quotedPrice"
+                            value={`£${parseFloat(booking.quoted_price).toFixed(2)}`}
+                            disabled
+                            className="input opacity-60 cursor-not-allowed"
+                        />
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="relative">
+                        <label htmlFor="contactName" className="label">Contact Name</label>
+                        <input
+                            type="text"
+                            id="contactName"
+                            name="contactName"
+                            value={formData.contactName}
                             onChange={handleChange}
                             placeholder="Full Name"
                             className="input"
@@ -147,9 +172,9 @@ export default function BookingCompletion() {
                         <label htmlFor="tenantPhone" className="label">Contact Phone</label>
                         <input
                             type="tel"
-                            id="tenantPhone"
-                            name="tenantPhone"
-                            value={formData.tenantPhone}
+                            id="contactPhone"
+                            name="contactPhone"
+                            value={formData.contactPhone}
                             onChange={handleChange}
                             placeholder="+44 7..."
                             className="input"
@@ -160,9 +185,9 @@ export default function BookingCompletion() {
                         <label htmlFor="tenantEmail" className="label">Contact Email</label>
                         <input
                             type="email"
-                            id="tenantEmail"
-                            name="tenantEmail"
-                            value={formData.tenantEmail}
+                            id="contactEmail"
+                            name="contactEmail"
+                            value={formData.contactEmail}
                             onChange={handleChange}
                             placeholder="contact@example.com"
                             className="input"
