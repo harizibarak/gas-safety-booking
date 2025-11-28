@@ -5,10 +5,10 @@ create table bookings (
   expiry_date date,
   address text,
   client_email text,
-  has_tenant boolean default false,
   tenant_name text,
   tenant_phone text,
-  tenant_email text
+  tenant_email text,
+  status text default 'lead'
 );
 
 -- Enable Row Level Security (RLS)

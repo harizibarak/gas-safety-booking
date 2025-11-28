@@ -8,11 +8,7 @@ export default function BookingForm() {
     const [formData, setFormData] = useState({
         expiryDate: null,
         address: '',
-        clientEmail: '',
-        hasTenant: false,
-        tenantName: '',
-        tenantPhone: '',
-        tenantEmail: ''
+        clientEmail: ''
     });
 
     const [errors, setErrors] = useState({});
@@ -20,10 +16,10 @@ export default function BookingForm() {
     const [isSuccess, setIsSuccess] = useState(false);
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value
         }));
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -47,10 +43,6 @@ export default function BookingForm() {
             newErrors.clientEmail = 'Please enter a valid email';
         }
 
-        if (formData.hasTenant) {
-            if (!formData.tenantName.trim()) newErrors.tenantName = 'Tenant name is required';
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -69,17 +61,14 @@ export default function BookingForm() {
                         expiry_date: formData.expiryDate,
                         address: formData.address,
                         client_email: formData.clientEmail,
-                        has_tenant: formData.hasTenant,
-                        tenant_name: formData.hasTenant ? formData.tenantName : null,
-                        tenant_phone: formData.hasTenant ? formData.tenantPhone : null,
-                        tenant_email: formData.hasTenant ? formData.tenantEmail : null
+                        status: 'lead'
                     }
                 ]);
 
             if (error) throw error;
 
             setIsSuccess(true);
-            console.log('Form submitted successfully');
+            console.log('Lead submitted successfully');
         } catch (error) {
             console.error('Error submitting booking:', error);
             alert('Failed to submit booking. Please try again.');
@@ -90,13 +79,13 @@ export default function BookingForm() {
 
     if (isSuccess) {
         return (
-            <div className="card fade-in text-center py-16">
+            <div className="card fade-in flex flex-col items-center justify-center text-center py-16">
                 <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                     <FaCheckCircle className="w-12 h-12 text-green-500" />
                 </div>
-                <h2 className="text-3xl font-bold mb-4 text-white">Booking Received!</h2>
+                <h2 className="text-3xl font-bold mb-4 text-white">Details Received!</h2>
                 <p className="text-slate-400 mb-10 text-lg max-w-md mx-auto">
-                    Thank you. We have received your inspection request. We will contact you shortly at <strong className="text-sky-400">{formData.clientEmail}</strong> to confirm the appointment.
+                    Thank you. We have recorded your certificate expiry. We will contact you at <strong className="text-sky-400">{formData.clientEmail}</strong> when it's time to renew with a quote.
                 </p>
                 <button
                     onClick={() => {
@@ -104,16 +93,12 @@ export default function BookingForm() {
                         setFormData({
                             expiryDate: null,
                             address: '',
-                            clientEmail: '',
-                            hasTenant: false,
-                            tenantName: '',
-                            tenantPhone: '',
-                            tenantEmail: ''
+                            clientEmail: ''
                         });
                     }}
                     className="btn btn-primary"
                 >
-                    Book Another Property
+                    Add Another Property
                 </button>
             </div>
         );
@@ -124,8 +109,8 @@ export default function BookingForm() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-purple-600"></div>
 
             <div className="mb-8 text-center">
-                <h2 className="text-2xl font-bold mb-2 text-white">Book Inspection</h2>
-                <p className="text-slate-400">Fill in the details below to schedule your certificate renewal.</p>
+                <h2 className="text-2xl font-bold mb-2 text-white">Register for Renewal</h2>
+                <p className="text-slate-400">Enter your details to get a quote when your certificate is due.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
@@ -180,79 +165,6 @@ export default function BookingForm() {
                     {errors.clientEmail && <p className="text-red-400 text-sm mt-2 flex items-center"><span className="mr-1">•</span> {errors.clientEmail}</p>}
                 </div>
 
-                {/* Tenant Details Toggle */}
-                <div className="tenant-toggle">
-                    <label className="flex items-center justify-between cursor-pointer select-none">
-                        <span className="text-sm font-medium text-slate-200">Is there a tenant currently in the property?</span>
-                        <div className="relative">
-                            <input
-                                type="checkbox"
-                                name="hasTenant"
-                                checked={formData.hasTenant}
-                                onChange={handleChange}
-                                className="sr-only"
-                            />
-                            <div className={`block w-12 h-7 rounded-full transition-all duration-300 ${formData.hasTenant ? 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)]' : 'bg-slate-700'}`}></div>
-                            <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 ${formData.hasTenant ? 'transform translate-x-5' : ''}`}></div>
-                        </div>
-                    </label>
-                </div>
-
-                {/* Tenant Details Section */}
-                {formData.hasTenant && (
-                    <div className="pl-6 border-sky-500/30 ml-2 space-y-8 fade-in pt-4 pb-2">
-                        <h3 className="text-xs uppercase tracking-widest font-bold text-sky-400 mb-4">Tenant Details</h3>
-
-                        <div className="relative">
-                            <label htmlFor="tenantName" className="label">Tenant Name</label>
-                            <div className="relative group">
-                                <input
-                                    type="text"
-                                    id="tenantName"
-                                    name="tenantName"
-                                    value={formData.tenantName}
-                                    onChange={handleChange}
-                                    placeholder="John Doe"
-                                    className={`input ${errors.tenantName ? 'border-red-500/50 focus:border-red-500' : ''}`}
-                                />
-                            </div>
-                            {errors.tenantName && <p className="text-red-400 text-sm mt-2 flex items-center"><span className="mr-1">•</span> {errors.tenantName}</p>}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="relative">
-                                <label htmlFor="tenantPhone" className="label">Tenant Phone <span className="text-slate-500 font-normal ml-1">(Optional)</span></label>
-                                <div className="relative group">
-                                    <input
-                                        type="tel"
-                                        id="tenantPhone"
-                                        name="tenantPhone"
-                                        value={formData.tenantPhone}
-                                        onChange={handleChange}
-                                        placeholder="+44 7..."
-                                        className="input"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="relative">
-                                <label htmlFor="tenantEmail" className="label">Tenant Email <span className="text-slate-500 font-normal ml-1">(Optional)</span></label>
-                                <div className="relative group">
-                                    <input
-                                        type="email"
-                                        id="tenantEmail"
-                                        name="tenantEmail"
-                                        value={formData.tenantEmail}
-                                        onChange={handleChange}
-                                        placeholder="tenant@example.com"
-                                        className="input"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 <button
                     type="submit"
                     disabled={isSubmitting}
@@ -267,7 +179,7 @@ export default function BookingForm() {
                             Processing...
                         </span>
                     ) : (
-                        'Book Inspection'
+                        'Submit Details'
                     )}
                 </button>
             </form>
