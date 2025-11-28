@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { FaCheckCircle } from 'react-icons/fa';
 
 export default function BookingCompletion() {
-    const { id } = useParams();
+    const { token } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(null);
@@ -19,7 +19,7 @@ export default function BookingCompletion() {
 
     useEffect(() => {
         fetchBooking();
-    }, [id]);
+    }, [token]);
 
     useEffect(() => {
         if (!loading && booking && !isSuccess && contactNameRef.current) {
@@ -29,11 +29,11 @@ export default function BookingCompletion() {
 
     const fetchBooking = async () => {
         try {
-            // Fetch lead details
+            // Fetch lead details by id (which is now a UUID)
             const { data: leadData, error: leadError } = await supabase
                 .from('leads')
                 .select('*')
-                .eq('id', id)
+                .eq('id', token)
                 .single();
 
             if (leadError) throw leadError;
@@ -42,7 +42,7 @@ export default function BookingCompletion() {
             const { data: confirmedData, error: confirmedError } = await supabase
                 .from('confirmed_bookings')
                 .select('id')
-                .eq('lead_id', id)
+                .eq('lead_id', leadData.id)
                 .maybeSingle();
 
             if (confirmedError && confirmedError.code !== 'PGRST116') throw confirmedError;
@@ -79,7 +79,7 @@ export default function BookingCompletion() {
                 .from('confirmed_bookings')
                 .insert([
                     {
-                        lead_id: id,
+                        lead_id: booking.id,
                         contact_name: formData.contactName,
                         contact_phone: formData.contactPhone,
                         contact_email: formData.contactEmail
@@ -169,7 +169,7 @@ export default function BookingCompletion() {
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="tenantPhone" className="label">Contact Phone</label>
+                        <label htmlFor="contactPhone" className="label">Contact Phone</label>
                         <input
                             type="tel"
                             id="contactPhone"
@@ -182,7 +182,7 @@ export default function BookingCompletion() {
                     </div>
 
                     <div className="relative">
-                        <label htmlFor="tenantEmail" className="label">Contact Email</label>
+                        <label htmlFor="contactEmail" className="label">Contact Email</label>
                         <input
                             type="email"
                             id="contactEmail"

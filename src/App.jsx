@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/complete-booking/:id" element={<BookingCompletion />} />
+        <Route path="/complete-booking/:token" element={<BookingCompletion />} />
       </Routes>
     </Router>
   );

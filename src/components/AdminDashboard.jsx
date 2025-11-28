@@ -48,12 +48,6 @@ export default function AdminDashboard() {
         }
     };
 
-    const copyLink = (id) => {
-        const link = `${window.location.origin}/complete-booking/${id}`;
-        navigator.clipboard.writeText(link);
-        alert('Booking link copied to clipboard!');
-    };
-
     const toggleLeadSelection = (id) => {
         setSelectedLeads(prev =>
             prev.includes(id) ? prev.filter(leadId => leadId !== id) : [...prev, id]
@@ -150,8 +144,7 @@ export default function AdminDashboard() {
                                         <th className="px-6 py-3">Email</th>
                                         <th className="px-6 py-3">Address</th>
                                         <th className="px-6 py-3">Expiry</th>
-                                        <th className="px-6 py-3">Quote</th>
-                                        <th className="px-6 py-3 pr-8">Action</th>
+                                        <th className="px-6 py-3 pr-8">Quote</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
@@ -169,22 +162,14 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-3 text-white">{lead.client_email}</td>
                                             <td className="px-6 py-3">{lead.address}</td>
                                             <td className="px-6 py-3">{lead.expiry_date}</td>
-                                            <td className="px-6 py-3">
-                                                {lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : '-'}
-                                            </td>
                                             <td className="px-6 py-3 pr-8">
-                                                <button
-                                                    onClick={() => copyLink(lead.id)}
-                                                    className="text-sky-400 hover:text-sky-300 font-medium"
-                                                >
-                                                    Copy Link
-                                                </button>
+                                                {lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : '-'}
                                             </td>
                                         </tr>
                                     ))}
                                     {leads.length === 0 && (
                                         <tr>
-                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No leads found.</td>
+                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No leads found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -205,7 +190,8 @@ export default function AdminDashboard() {
                                         <th className="px-6 py-3">Client Email</th>
                                         <th className="px-6 py-3">Address</th>
                                         <th className="px-6 py-3">Contact Name</th>
-                                        <th className="px-6 py-3 pr-8">Contact Phone</th>
+                                        <th className="px-6 py-3">Contact Phone</th>
+                                        <th className="px-6 py-3 pr-8">Contact Email</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
@@ -215,15 +201,13 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-3 text-white">{booking.leads?.client_email || '-'}</td>
                                             <td className="px-6 py-3">{booking.leads?.address || '-'}</td>
                                             <td className="px-6 py-3">{booking.contact_name || '-'}</td>
-                                            <td className="px-6 py-3 pr-8">
-                                                {booking.contact_phone && <div>{booking.contact_phone}</div>}
-                                                {booking.contact_email && <div>{booking.contact_email}</div>}
-                                            </td>
+                                            <td className="px-6 py-3">{booking.contact_phone || '-'}</td>
+                                            <td className="px-6 py-3 pr-8">{booking.contact_email || '-'}</td>
                                         </tr>
                                     ))}
                                     {bookings.length === 0 && (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No confirmed bookings found.</td>
+                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No confirmed bookings found.</td>
                                         </tr>
                                     )}
                                 </tbody>
