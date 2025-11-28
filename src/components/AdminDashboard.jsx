@@ -99,19 +99,19 @@ export default function AdminDashboard() {
     if (loading) return <div className="text-white text-center py-20">Loading...</div>;
 
     return (
-        <div className="container mx-auto py-20 px-6 lg:px-8">
-            <h2 className="text-4xl font-bold text-white mb-16 text-center">Admin Dashboard</h2>
+        <div className="container mx-auto py-12 px-6 lg:px-8">
+            <h2 className="text-4xl font-bold text-white mb-12 text-center">Admin Dashboard</h2>
 
-            <div className="space-y-24">
+            <div className="space-y-12">
                 {/* Leads Section */}
-                <section className="flex flex-col gap-2">
-                    <h3 className="text-2xl font-semibold text-sky-400">Leads ({leads.length})</h3>
+                <section className="flex flex-col gap-4">
+                    <h3 className="text-2xl font-semibold text-sky-400 mb-2">Leads ({leads.length})</h3>
                     
                     {/* Batch Quote Section */}
                     {leads.length > 0 && (
-                        <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700 mb-4">
+                        <div className="p-5 bg-slate-800/50 rounded-lg border border-slate-700" style={{ padding: '0.2rem' }}>
                             <div className="flex items-center gap-4">
-                                <label className="label whitespace-nowrap">Quote Price (£)</label>
+                                <label className="whitespace-nowrap font-semibold text-slate-200" style={{ margin: 0 }}>Quote Price (£)</label>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -125,6 +125,7 @@ export default function AdminDashboard() {
                                     onClick={applyBatchQuote}
                                     disabled={isApplying || selectedLeads.length === 0}
                                     className={`btn btn-primary whitespace-nowrap ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    style={{ marginTop: 0 }}
                                 >
                                     {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
                                 </button>
@@ -132,12 +133,12 @@ export default function AdminDashboard() {
                         </div>
                     )}
 
-                    <div className="rounded-md border border-slate-700 overflow-hidden">
-                        <div className="overflow-x-auto">
+                    <div className="rounded-md border border-slate-700 overflow-hidden" style={{ padding: '0.2rem' }}>
+                        <div className="overflow-x-auto p-1">
                             <table className="w-full text-left text-sm text-slate-400">
                                 <thead className="bg-slate-800 text-slate-200 uppercase font-medium">
                                     <tr>
-                                        <th className="px-6 py-4">
+                                        <th className="px-6 py-3 pl-8">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedLeads.length === leads.length && leads.length > 0}
@@ -145,18 +146,18 @@ export default function AdminDashboard() {
                                                 className="w-4 h-4 cursor-pointer"
                                             />
                                         </th>
-                                        <th className="px-6 py-4">Date</th>
-                                        <th className="px-6 py-4">Email</th>
-                                        <th className="px-6 py-4">Address</th>
-                                        <th className="px-6 py-4">Expiry</th>
-                                        <th className="px-6 py-4">Quote</th>
-                                        <th className="px-6 py-4">Action</th>
+                                        <th className="px-6 py-3">Date</th>
+                                        <th className="px-6 py-3">Email</th>
+                                        <th className="px-6 py-3">Address</th>
+                                        <th className="px-6 py-3">Expiry</th>
+                                        <th className="px-6 py-3">Quote</th>
+                                        <th className="px-6 py-3 pr-8">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
                                     {leads.map((lead) => (
                                         <tr key={lead.id} className="hover:bg-slate-800/50 transition-colors">
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-3 pl-8">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedLeads.includes(lead.id)}
@@ -164,14 +165,14 @@ export default function AdminDashboard() {
                                                     className="w-4 h-4 cursor-pointer"
                                                 />
                                             </td>
-                                            <td className="px-6 py-4">{new Date(lead.created_at).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 text-white">{lead.client_email}</td>
-                                            <td className="px-6 py-4">{lead.address}</td>
-                                            <td className="px-6 py-4">{lead.expiry_date}</td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-3">{new Date(lead.created_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-3 text-white">{lead.client_email}</td>
+                                            <td className="px-6 py-3">{lead.address}</td>
+                                            <td className="px-6 py-3">{lead.expiry_date}</td>
+                                            <td className="px-6 py-3">
                                                 {lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : '-'}
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-3 pr-8">
                                                 <button
                                                     onClick={() => copyLink(lead.id)}
                                                     className="text-sky-400 hover:text-sky-300 font-medium"
@@ -183,7 +184,7 @@ export default function AdminDashboard() {
                                     ))}
                                     {leads.length === 0 && (
                                         <tr>
-                                            <td colSpan="7" className="px-6 py-8 text-center text-slate-500">No leads found.</td>
+                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No leads found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -193,28 +194,28 @@ export default function AdminDashboard() {
                 </section>
 
                 {/* Confirmed Bookings Section */}
-                <section className="flex flex-col gap-2" style={{ marginTop: '1rem' }}>
-                    <h3 className="text-2xl font-semibold text-green-400 ml-4">Confirmed Bookings ({bookings.length})</h3>
-                    <div className="rounded-md border border-slate-700 overflow-hidden">
-                        <div className="overflow-x-auto">
+                <section className="flex flex-col gap-4" style={{ marginTop: '1rem' }}>
+                    <h3 className="text-2xl font-semibold text-green-400 mb-2">Confirmed Bookings ({bookings.length})</h3>
+                    <div className="rounded-md border border-slate-700 overflow-hidden" style={{ padding: '0.2rem' }}>
+                        <div className="overflow-x-auto p-1">
                             <table className="w-full text-left text-sm text-slate-400">
                                 <thead className="bg-slate-800 text-slate-200 uppercase font-medium">
                                     <tr>
-                                        <th className="px-6 py-4">Date</th>
-                                        <th className="px-6 py-4">Client Email</th>
-                                        <th className="px-6 py-4">Address</th>
-                                        <th className="px-6 py-4">Contact Name</th>
-                                        <th className="px-6 py-4">Contact Phone</th>
+                                        <th className="px-6 py-3 pl-8">Date</th>
+                                        <th className="px-6 py-3">Client Email</th>
+                                        <th className="px-6 py-3">Address</th>
+                                        <th className="px-6 py-3">Contact Name</th>
+                                        <th className="px-6 py-3 pr-8">Contact Phone</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
                                     {bookings.map((booking) => (
                                         <tr key={booking.id} className="hover:bg-slate-800/50 transition-colors">
-                                            <td className="px-6 py-4">{new Date(booking.created_at).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 text-white">{booking.leads?.client_email || '-'}</td>
-                                            <td className="px-6 py-4">{booking.leads?.address || '-'}</td>
-                                            <td className="px-6 py-4">{booking.contact_name || '-'}</td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-3 pl-8">{new Date(booking.created_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-3 text-white">{booking.leads?.client_email || '-'}</td>
+                                            <td className="px-6 py-3">{booking.leads?.address || '-'}</td>
+                                            <td className="px-6 py-3">{booking.contact_name || '-'}</td>
+                                            <td className="px-6 py-3 pr-8">
                                                 {booking.contact_phone && <div>{booking.contact_phone}</div>}
                                                 {booking.contact_email && <div>{booking.contact_email}</div>}
                                             </td>
@@ -222,7 +223,7 @@ export default function AdminDashboard() {
                                     ))}
                                     {bookings.length === 0 && (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-8 text-center text-slate-500">No confirmed bookings found.</td>
+                                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No confirmed bookings found.</td>
                                         </tr>
                                     )}
                                 </tbody>
