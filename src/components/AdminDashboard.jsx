@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { logout } from '../lib/auth';
+import { sendQuoteEmail, generateMailtoLink } from '../lib/emailService';
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
@@ -12,11 +13,46 @@ export default function AdminDashboard() {
     const [batchQuote, setBatchQuote] = useState('');
     const [isApplying, setIsApplying] = useState(false);
     const [glowingLeads, setGlowingLeads] = useState(new Set());
+    const [sendingEmails, setSendingEmails] = useState(new Set());
     const quoteInputRef = useRef(null);
 
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleSendEmail = async (lead) => {
+        if (!lead.client_email) {
+            alert('No email address available for this lead.');
+            return;
+        }
+
+        if (!lead.quoted_price) {
+            alert('Please set a quote price before sending an email.');
+            return;
+        }
+
+        setSendingEmails(prev => new Set(prev).add(lead.id));
+
+        try {
+            await sendQuoteEmail(lead);
+            alert(`Email sent successfully to ${lead.client_email}`);
+        } catch (error) {
+            console.error('Error sending email:', error);
+            // Fallback to mailto link
+            const confirmed = window.confirm(
+                'Email service not configured. Would you like to open your email client instead?'
+            );
+            if (confirmed) {
+                window.location.href = generateMailtoLink(lead);
+            }
+        } finally {
+            setSendingEmails(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(lead.id);
+                return newSet;
+            });
+        }
     };
 
     useEffect(() => {
@@ -201,7 +237,8 @@ export default function AdminDashboard() {
                                         <th className="px-6 py-3">Email</th>
                                         <th className="px-6 py-3">Address</th>
                                         <th className="px-6 py-3">Expiry</th>
-                                        <th className="px-6 py-3 pr-8">Quote</th>
+                                        <th className="px-6 py-3">Quote</th>
+                                        <th className="px-6 py-3 pr-8">Send Email</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
@@ -224,14 +261,27 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-3 text-white">{lead.client_email}</td>
                                             <td className="px-6 py-3">{lead.address}</td>
                                             <td className="px-6 py-3">{lead.expiry_date}</td>
-                                            <td className="px-6 py-3 pr-8">
+                                            <td className="px-6 py-3">
                                                 {lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : '-'}
+                                            </td>
+                                            <td className="px-6 py-3 pr-8">
+                                                <button
+                                                    onClick={() => handleSendEmail(lead)}
+                                                    disabled={sendingEmails.has(lead.id) || !lead.quoted_price || !lead.client_email}
+                                                    className={`text-sm px-3 py-1 rounded ${
+                                                        sendingEmails.has(lead.id) || !lead.quoted_price || !lead.client_email
+                                                            ? 'opacity-50 cursor-not-allowed text-slate-500'
+                                                            : 'text-sky-400 hover:text-sky-300 hover:bg-sky-400/10'
+                                                    } transition-colors`}
+                                                >
+                                                    {sendingEmails.has(lead.id) ? 'Sending...' : 'Send Email'}
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                     {leads.length === 0 && (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No leads found.</td>
+                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No leads found.</td>
                                         </tr>
                                     )}
                                 </tbody>
