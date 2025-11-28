@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
 export default function AdminDashboard() {
@@ -8,6 +8,8 @@ export default function AdminDashboard() {
     const [selectedLeads, setSelectedLeads] = useState([]);
     const [batchQuote, setBatchQuote] = useState('');
     const [isApplying, setIsApplying] = useState(false);
+    const [glowingLeads, setGlowingLeads] = useState(new Set());
+    const quoteInputRef = useRef(null);
 
     useEffect(() => {
         fetchData();
@@ -52,6 +54,10 @@ export default function AdminDashboard() {
         setSelectedLeads(prev =>
             prev.includes(id) ? prev.filter(leadId => leadId !== id) : [...prev, id]
         );
+        // Focus the quote input after checkbox interaction
+        setTimeout(() => {
+            quoteInputRef.current?.focus();
+        }, 0);
     };
 
     const toggleSelectAll = () => {
@@ -60,11 +66,14 @@ export default function AdminDashboard() {
         } else {
             setSelectedLeads(leads.map(lead => lead.id));
         }
+        // Focus the quote input after checkbox interaction
+        setTimeout(() => {
+            quoteInputRef.current?.focus();
+        }, 0);
     };
 
     const applyBatchQuote = async () => {
         if (!batchQuote || selectedLeads.length === 0) {
-            alert('Please enter a quote and select at least one lead.');
             return;
         }
 
@@ -78,13 +87,19 @@ export default function AdminDashboard() {
 
             if (error) throw error;
 
-            alert(`Quote of £${batchQuote} applied to ${selectedLeads.length} lead(s)`);
+            // Add updated leads to glowing set
+            setGlowingLeads(new Set(selectedLeads));
+            
+            // Remove glow after 1.5 seconds
+            setTimeout(() => {
+                setGlowingLeads(new Set());
+            }, 1500);
+
             setSelectedLeads([]);
             setBatchQuote('');
             fetchData(); // Refresh data
         } catch (error) {
             console.error('Error applying batch quote:', error);
-            alert('Failed to apply quote. Please try again.');
         } finally {
             setIsApplying(false);
         }
@@ -104,9 +119,18 @@ export default function AdminDashboard() {
                     {/* Batch Quote Section */}
                     {leads.length > 0 && (
                         <div className="p-5 bg-slate-800/50 rounded-lg border border-slate-700" style={{ padding: '0.2rem' }}>
-                            <div className="flex items-center gap-4">
+                            <form 
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (!isApplying && selectedLeads.length > 0 && batchQuote) {
+                                        applyBatchQuote();
+                                    }
+                                }}
+                                className="flex items-center gap-4"
+                            >
                                 <label className="whitespace-nowrap font-semibold text-slate-200" style={{ margin: 0 }}>Quote Price (£)</label>
                                 <input
+                                    ref={quoteInputRef}
                                     type="number"
                                     step="0.01"
                                     min="0"
@@ -116,14 +140,18 @@ export default function AdminDashboard() {
                                     className="input flex-1"
                                 />
                                 <button
-                                    onClick={applyBatchQuote}
-                                    disabled={isApplying || selectedLeads.length === 0}
+                                    type="submit"
                                     className={`btn btn-primary whitespace-nowrap ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     style={{ marginTop: 0 }}
+                                    onClick={(e) => {
+                                        if (isApplying || selectedLeads.length === 0) {
+                                            e.preventDefault();
+                                        }
+                                    }}
                                 >
                                     {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
                                 </button>
-                            </div>
+                            </form>
                         </div>
                     )}
 
@@ -149,7 +177,12 @@ export default function AdminDashboard() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
                                     {leads.map((lead) => (
-                                        <tr key={lead.id} className="hover:bg-slate-800/50 transition-colors">
+                                        <tr 
+                                            key={lead.id} 
+                                            className={`hover:bg-slate-800/50 transition-colors ${
+                                                glowingLeads.has(lead.id) ? 'glow-effect' : ''
+                                            }`}
+                                        >
                                             <td className="px-6 py-3 pl-8">
                                                 <input
                                                     type="checkbox"

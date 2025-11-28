@@ -243,3 +243,24 @@ p {
     transform: translateY(0);
   }
 }
+
+.glow-effect {
+  animation: glowFadeOut 1.5s ease-out forwards;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.6), 0 0 40px rgba(56, 189, 248, 0.4);
+  background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+@keyframes glowFadeOut {
+  0% {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.6), 0 0 40px rgba(56, 189, 248, 0.4);
+    background-color: rgba(56, 189, 248, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), 0 0 30px rgba(56, 189, 248, 0.2);
+    background-color: rgba(56, 189, 248, 0.08);
+  }
+  100% {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
