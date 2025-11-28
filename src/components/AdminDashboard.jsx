@@ -109,25 +109,22 @@ export default function AdminDashboard() {
                     
                     {/* Batch Quote Section */}
                     {leads.length > 0 && (
-                        <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700 mb-4">
-                            <h4 className="text-lg font-semibold text-white mb-4">Batch Quote</h4>
-                            <div className="flex items-end gap-4">
-                                <div className="flex-1">
-                                    <label className="label">Quote Price (£)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={batchQuote}
-                                        onChange={(e) => setBatchQuote(e.target.value)}
-                                        placeholder="e.g. 75.00"
-                                        className="input"
-                                    />
-                                </div>
+                        <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700 mb-4">
+                            <div className="flex items-center gap-4">
+                                <label className="label whitespace-nowrap">Quote Price (£)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={batchQuote}
+                                    onChange={(e) => setBatchQuote(e.target.value)}
+                                    placeholder="e.g. 75.00"
+                                    className="input flex-1"
+                                />
                                 <button
                                     onClick={applyBatchQuote}
                                     disabled={isApplying || selectedLeads.length === 0}
-                                    className={`btn btn-primary ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`btn btn-primary whitespace-nowrap ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
                                 </button>
@@ -196,7 +193,7 @@ export default function AdminDashboard() {
                 </section>
 
                 {/* Confirmed Bookings Section */}
-                <section className="flex flex-col gap-2">
+                <section className="flex flex-col gap-2" style={{ marginTop: '1rem' }}>
                     <h3 className="text-2xl font-semibold text-green-400 ml-4">Confirmed Bookings ({bookings.length})</h3>
                     <div className="rounded-md border border-slate-700 overflow-hidden">
                         <div className="overflow-x-auto">
