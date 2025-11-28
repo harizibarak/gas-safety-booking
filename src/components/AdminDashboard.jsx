@@ -139,8 +139,11 @@ export default function AdminDashboard() {
                             <form 
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    if (!isApplying && selectedLeads.length > 0 && batchQuote) {
-                                        applyBatchQuote();
+                                    // Only submit if Command/Ctrl key is pressed
+                                    if (e.nativeEvent.submitter?.dataset.forceSubmit === 'true') {
+                                        if (!isApplying && selectedLeads.length > 0 && batchQuote) {
+                                            applyBatchQuote();
+                                        }
                                     }
                                 }}
                                 className="flex items-center gap-4"
@@ -153,6 +156,15 @@ export default function AdminDashboard() {
                                     min="0"
                                     value={batchQuote}
                                     onChange={(e) => setBatchQuote(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        // Check for Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+                                        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (!isApplying && selectedLeads.length > 0 && batchQuote) {
+                                                applyBatchQuote();
+                                            }
+                                        }
+                                    }}
                                     placeholder="e.g. 75.00"
                                     className="input flex-1"
                                 />
