@@ -105,7 +105,7 @@ export default function BookingForm() {
     }
 
     return (
-        <div className="card fade-in relative overflow-hidden backdrop-blur-xl bg-slate-900/40 border border-white/10 shadow-2xl !p-10">
+        <div className="card fade-in relative overflow-hidden backdrop-blur-xl bg-slate-900/40 border border-white/10 shadow-2xl !p-7">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-purple-600"></div>
 
             <div className="mb-8 text-center">
