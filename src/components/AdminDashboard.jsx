@@ -116,7 +116,7 @@ export default function AdminDashboard() {
     if (loading) return <div className="text-white text-center py-20">Loading...</div>;
 
     return (
-        <div className="container mx-auto py-12 px-6 lg:px-8">
+        <div className="container mx-auto py-12 px-6 lg:px-8" style={{ marginTop: '1rem' }}>
             <div className="flex justify-between items-center mb-12">
                 <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
                 <button
