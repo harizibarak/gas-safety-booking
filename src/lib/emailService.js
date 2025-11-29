@@ -24,7 +24,7 @@ export const sendQuoteEmail = async (lead) => {
         quoted_price: lead.quoted_price ? `£${parseFloat(lead.quoted_price).toFixed(2)}` : 'Not quoted yet',
         booking_token: lead.id, // UUID token for booking completion link
         booking_link: `${window.location.origin}/complete-booking/${lead.id}`,
-        reply_to: 'noreply@example.com' // Change this to your email
+        reply_to: import.meta.env.VITE_REPLY_TO_EMAIL || 'noreply@example.com'
     };
 
     try {

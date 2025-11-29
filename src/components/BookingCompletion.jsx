@@ -29,7 +29,6 @@ export default function BookingCompletion() {
 
     const fetchBooking = async () => {
         try {
-            // Fetch lead details by id (which is now a UUID)
             const { data: leadData, error: leadError } = await supabase
                 .from('leads')
                 .select('*')
@@ -38,7 +37,6 @@ export default function BookingCompletion() {
 
             if (leadError) throw leadError;
 
-            // Check if already confirmed
             const { data: confirmedData, error: confirmedError } = await supabase
                 .from('confirmed_bookings')
                 .select('id')
@@ -48,7 +46,7 @@ export default function BookingCompletion() {
             if (confirmedError && confirmedError.code !== 'PGRST116') throw confirmedError;
 
             if (confirmedData) {
-                setIsSuccess(true); // Already confirmed
+                setIsSuccess(true);
             }
             setBooking(leadData);
         } catch (error) {

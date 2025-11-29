@@ -48,7 +48,7 @@ export default function AdminDashboard() {
             if (error) throw error;
 
             setSelectedLeads([]);
-            fetchData(); // Refresh data
+            fetchData();
         } catch (error) {
             console.error('Error deleting leads:', error);
             alert('Failed to delete leads. Please try again.');
@@ -100,7 +100,6 @@ export default function AdminDashboard() {
             alert(`Email sent successfully to ${lead.client_email}`);
         } catch (error) {
             console.error('Error sending email:', error);
-            // Fallback to mailto link
             const confirmed = window.confirm(
                 'Email service not configured. Would you like to open your email client instead?'
             );
@@ -122,7 +121,6 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            // Fetch leads (excluding soft-deleted ones)
             const { data: leadsData, error: leadsError } = await supabase
                 .from('leads')
                 .select('*')
@@ -131,7 +129,6 @@ export default function AdminDashboard() {
 
             if (leadsError) throw leadsError;
 
-            // Fetch confirmed bookings with lead details
             const { data: bookingsData, error: bookingsError } = await supabase
                 .from('confirmed_bookings')
                 .select(`
@@ -160,10 +157,7 @@ export default function AdminDashboard() {
         setSelectedLeads(prev =>
             prev.includes(id) ? prev.filter(leadId => leadId !== id) : [...prev, id]
         );
-        // Focus the quote input after checkbox interaction
-        setTimeout(() => {
-            quoteInputRef.current?.focus();
-        }, 0);
+        setTimeout(() => quoteInputRef.current?.focus(), 0);
     };
 
     const toggleSelectAll = () => {
@@ -172,10 +166,7 @@ export default function AdminDashboard() {
         } else {
             setSelectedLeads(leads.map(lead => lead.id));
         }
-        // Focus the quote input after checkbox interaction
-        setTimeout(() => {
-            quoteInputRef.current?.focus();
-        }, 0);
+        setTimeout(() => quoteInputRef.current?.focus(), 0);
     };
 
     const applyBatchQuote = async () => {
@@ -193,13 +184,8 @@ export default function AdminDashboard() {
 
             if (error) throw error;
 
-            // Add updated leads to glowing set
             setGlowingLeads(new Set(selectedLeads));
-            
-            // Remove glow after 1.5 seconds
-            setTimeout(() => {
-                setGlowingLeads(new Set());
-            }, 1500);
+            setTimeout(() => setGlowingLeads(new Set()), 1500);
 
             setSelectedLeads([]);
             setBatchQuote('');
@@ -235,10 +221,7 @@ export default function AdminDashboard() {
                     {leads.length > 0 && (
                         <div className="p-5 bg-slate-800/50 rounded-lg border border-slate-700" style={{ padding: '0.2rem' }}>
                             <form 
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    // Prevent default form submission - we handle it via button click
-                                }}
+                                onSubmit={(e) => e.preventDefault()}
                                 className="flex items-center gap-4"
                             >
                                 <label className="whitespace-nowrap font-semibold text-slate-200" style={{ margin: 0 }}>Quote Price (£)</label>
@@ -250,7 +233,6 @@ export default function AdminDashboard() {
                                     value={batchQuote}
                                     onChange={(e) => setBatchQuote(e.target.value)}
                                     onKeyDown={(e) => {
-                                        // Check for Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
                                         if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                                             e.preventDefault();
                                             if (!isApplying && selectedLeads.length > 0 && batchQuote) {

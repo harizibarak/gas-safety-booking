@@ -9,7 +9,6 @@ export default function ProtectedRoute({ children }) {
     const location = useLocation();
 
     useEffect(() => {
-        // Re-check authentication whenever the location changes
         setChecking(true);
         setAuthenticated(isAuthenticated());
         setChecking(false);

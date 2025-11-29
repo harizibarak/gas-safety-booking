@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { login } from '../lib/auth';
 
 export default function Login() {
@@ -7,10 +6,8 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const navigate = useNavigate();
     const usernameRef = useRef(null);
 
-    // Focus username input on mount
     useEffect(() => {
         usernameRef.current?.focus();
     }, []);
@@ -26,10 +23,8 @@ export default function Login() {
 
         setIsSubmitting(true);
 
-        // Small delay to prevent brute force
         setTimeout(() => {
             if (login(username, password)) {
-                // Use window.location to force a full reload and re-check authentication
                 window.location.href = '/admin';
             } else {
                 setError('Invalid username or password');
