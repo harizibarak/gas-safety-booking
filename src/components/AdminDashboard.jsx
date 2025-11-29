@@ -175,12 +175,7 @@ export default function AdminDashboard() {
                             <form 
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    // Only submit if Command/Ctrl key is pressed
-                                    if (e.nativeEvent.submitter?.dataset.forceSubmit === 'true') {
-                                        if (!isApplying && selectedLeads.length > 0 && batchQuote) {
-                                            applyBatchQuote();
-                                        }
-                                    }
+                                    // Prevent default form submission - we handle it via button click
                                 }}
                                 className="flex items-center gap-4"
                             >
@@ -205,14 +200,16 @@ export default function AdminDashboard() {
                                     className="input flex-1"
                                 />
                                 <button
-                                    type="submit"
-                                    className={`btn btn-primary whitespace-nowrap ${isApplying || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    style={{ marginTop: 0 }}
+                                    type="button"
                                     onClick={(e) => {
-                                        if (isApplying || selectedLeads.length === 0) {
-                                            e.preventDefault();
+                                        e.preventDefault();
+                                        if (!isApplying && selectedLeads.length > 0 && batchQuote) {
+                                            applyBatchQuote();
                                         }
                                     }}
+                                    disabled={isApplying || selectedLeads.length === 0 || !batchQuote}
+                                    className={`btn btn-primary whitespace-nowrap ${isApplying || selectedLeads.length === 0 || !batchQuote ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    style={{ marginTop: 0 }}
                                 >
                                     {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
                                 </button>
