@@ -5,7 +5,8 @@ create table leads (
   expiry_date date,
   address text,
   client_email text,
-  quoted_price decimal(10,2)
+  quoted_price decimal(10,2),
+  deleted_at timestamp with time zone
 );
 
 -- Create the confirmed_bookings table

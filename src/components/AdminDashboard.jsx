@@ -12,6 +12,7 @@ export default function AdminDashboard() {
     const [selectedLeads, setSelectedLeads] = useState([]);
     const [batchQuote, setBatchQuote] = useState('');
     const [isApplying, setIsApplying] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [glowingLeads, setGlowingLeads] = useState(new Set());
     const [sendingEmails, setSendingEmails] = useState(new Set());
     const quoteInputRef = useRef(null);
@@ -19,6 +20,39 @@ export default function AdminDashboard() {
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleDeleteLeads = async () => {
+        if (selectedLeads.length === 0) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            `Are you sure you want to delete ${selectedLeads.length} selected lead(s)? This action can be undone.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setIsDeleting(true);
+
+        try {
+            const { error } = await supabase
+                .from('leads')
+                .update({ deleted_at: new Date().toISOString() })
+                .in('id', selectedLeads);
+
+            if (error) throw error;
+
+            setSelectedLeads([]);
+            fetchData(); // Refresh data
+        } catch (error) {
+            console.error('Error deleting leads:', error);
+            alert('Failed to delete leads. Please try again.');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const handleSendEmail = async (lead) => {
@@ -61,10 +95,11 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            // Fetch leads
+            // Fetch leads (excluding soft-deleted ones)
             const { data: leadsData, error: leadsError } = await supabase
                 .from('leads')
                 .select('*')
+                .is('deleted_at', null)
                 .order('created_at', { ascending: false });
 
             if (leadsError) throw leadsError;
@@ -212,6 +247,25 @@ export default function AdminDashboard() {
                                     style={{ marginTop: 0 }}
                                 >
                                     {isApplying ? 'Applying...' : `Apply to ${selectedLeads.length} Selected`}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (!isDeleting && selectedLeads.length > 0) {
+                                            handleDeleteLeads();
+                                        }
+                                    }}
+                                    disabled={isDeleting || selectedLeads.length === 0}
+                                    className={`btn whitespace-nowrap ${isDeleting || selectedLeads.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    style={{ 
+                                        marginTop: 0,
+                                        background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                                        color: 'white',
+                                        boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'
+                                    }}
+                                >
+                                    {isDeleting ? 'Deleting...' : `Delete ${selectedLeads.length} Selected`}
                                 </button>
                             </form>
                         </div>
