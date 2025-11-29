@@ -419,9 +419,10 @@ export default function AdminDashboard() {
                 >
                     <div 
                         className="bg-slate-800 rounded-lg border border-slate-700 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                        style={{ padding: '0.5rem' }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="p-5 border-b border-slate-700 flex justify-between items-center">
+                        <div className="p-5 border-b border-slate-700 flex justify-between items-center" style={{ padding: '0.5rem' }}>
                             <h3 className="text-xl font-bold text-white">Booking Details</h3>
                             <button
                                 onClick={closeBookingModal}
@@ -434,8 +435,8 @@ export default function AdminDashboard() {
                         <div className="p-5 space-y-5">
                             {/* Property Details */}
                             <div>
-                                <h4 className="text-base font-semibold text-sky-400 mb-3">Property Information</h4>
-                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4">
+                                <h4 className="text-base font-semibold text-sky-400 mb-3" style={{ margin: '0.5rem' }}>Property Information</h4>
+                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4" style={{ padding: '0.5rem' }}>
                                     <div className="flex justify-between items-start">
                                         <span className="text-slate-400 text-sm">Address:</span>
                                         <span className="text-white font-medium text-right max-w-[60%]">{selectedBooking.leads?.address || 'N/A'}</span>
@@ -463,8 +464,8 @@ export default function AdminDashboard() {
 
                             {/* Contact Details */}
                             <div className="border-t border-slate-700 pt-5">
-                                <h4 className="text-base font-semibold text-green-400 mb-3">Contact Details</h4>
-                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4">
+                                <h4 className="text-base font-semibold text-green-400 mb-3" style={{ margin: '0.5rem' }}>Contact Details</h4>
+                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4" style={{ padding: '0.5rem' }}>
                                     <div className="flex justify-between">
                                         <span className="text-slate-400 text-sm">Contact Name:</span>
                                         <span className="text-white text-sm">{selectedBooking.contact_name || 'N/A'}</span>
@@ -481,13 +482,13 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="p-5 border-t border-slate-700 flex gap-3">
+                        <div className="p-5 border-t border-slate-700 flex gap-3" style={{ paddingTop: '0.5rem' }}>
                             <button
                                 onClick={() => copyBookingDetails(selectedBooking)}
                                 className="btn btn-primary flex-1"
                                 style={{ marginTop: 0 }}
                             >
-                                Copy All Details
+                                Share Booking Details
                             </button>
                             <button
                                 onClick={closeBookingModal}
