@@ -15,6 +15,8 @@ export default function AdminDashboard() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [glowingLeads, setGlowingLeads] = useState(new Set());
     const [sendingEmails, setSendingEmails] = useState(new Set());
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [showBookingModal, setShowBookingModal] = useState(false);
     const quoteInputRef = useRef(null);
 
     const handleLogout = () => {
@@ -53,6 +55,31 @@ export default function AdminDashboard() {
         } finally {
             setIsDeleting(false);
         }
+    };
+
+    const handleBookingRowClick = (booking) => {
+        setSelectedBooking(booking);
+        setShowBookingModal(true);
+    };
+
+    const closeBookingModal = () => {
+        setShowBookingModal(false);
+        setSelectedBooking(null);
+    };
+
+    const copyBookingDetails = (booking) => {
+        const details = [
+            `Property Address: ${booking.leads?.address || 'N/A'}`,
+            `Certificate Expiry: ${booking.leads?.expiry_date || 'N/A'}`,
+            ``,
+            `Contact Details:`,
+            `Name: ${booking.contact_name || 'N/A'}`,
+            `Phone: ${booking.contact_phone || 'N/A'}`,
+            `Email: ${booking.contact_email || 'N/A'}`
+        ].join('\n');
+
+        navigator.clipboard.writeText(details);
+        alert('Booking details copied to clipboard!');
     };
 
     const handleSendEmail = async (lead) => {
@@ -352,25 +379,29 @@ export default function AdminDashboard() {
                                         <th className="px-6 py-3 pl-8">Date</th>
                                         <th className="px-6 py-3">Client Email</th>
                                         <th className="px-6 py-3">Address</th>
-                                        <th className="px-6 py-3">Contact Name</th>
-                                        <th className="px-6 py-3">Contact Phone</th>
-                                        <th className="px-6 py-3 pr-8">Contact Email</th>
+                                        <th className="px-6 py-3">Expiry</th>
+                                        <th className="px-6 py-3 pr-8">Quote</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-700 bg-slate-900/50">
                                     {bookings.map((booking) => (
-                                        <tr key={booking.id} className="hover:bg-slate-800/50 transition-colors">
+                                        <tr 
+                                            key={booking.id} 
+                                            onClick={() => handleBookingRowClick(booking)}
+                                            className="hover:bg-slate-800/50 transition-colors cursor-pointer"
+                                        >
                                             <td className="px-6 py-3 pl-8">{new Date(booking.created_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-3 text-white">{booking.leads?.client_email || '-'}</td>
                                             <td className="px-6 py-3">{booking.leads?.address || '-'}</td>
-                                            <td className="px-6 py-3">{booking.contact_name || '-'}</td>
-                                            <td className="px-6 py-3">{booking.contact_phone || '-'}</td>
-                                            <td className="px-6 py-3 pr-8">{booking.contact_email || '-'}</td>
+                                            <td className="px-6 py-3">{booking.leads?.expiry_date || '-'}</td>
+                                            <td className="px-6 py-3 pr-8">
+                                                {booking.leads?.quoted_price ? `£${parseFloat(booking.leads.quoted_price).toFixed(2)}` : '-'}
+                                            </td>
                                         </tr>
                                     ))}
                                     {bookings.length === 0 && (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No confirmed bookings found.</td>
+                                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500 pl-8 pr-8">No confirmed bookings found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -379,6 +410,101 @@ export default function AdminDashboard() {
                     </div>
                 </section>
             </div>
+
+            {/* Booking Details Modal */}
+            {showBookingModal && selectedBooking && (
+                <div 
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    onClick={closeBookingModal}
+                >
+                    <div 
+                        className="bg-slate-800 rounded-lg border border-slate-700 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-5 border-b border-slate-700 flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-white">Booking Details</h3>
+                            <button
+                                onClick={closeBookingModal}
+                                className="text-slate-400 hover:text-white text-2xl leading-none w-8 h-8 flex items-center justify-center"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="p-5 space-y-5">
+                            {/* Property Details */}
+                            <div>
+                                <h4 className="text-base font-semibold text-sky-400 mb-3">Property Information</h4>
+                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4">
+                                    <div className="flex justify-between items-start">
+                                        <span className="text-slate-400 text-sm">Address:</span>
+                                        <span className="text-white font-medium text-right max-w-[60%]">{selectedBooking.leads?.address || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Client Email:</span>
+                                        <span className="text-white text-sm">{selectedBooking.leads?.client_email || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Certificate Expiry:</span>
+                                        <span className="text-white text-sm">{selectedBooking.leads?.expiry_date || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Quote:</span>
+                                        <span className="text-white font-semibold text-sm">
+                                            {selectedBooking.leads?.quoted_price ? `£${parseFloat(selectedBooking.leads.quoted_price).toFixed(2)}` : 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Booking Date:</span>
+                                        <span className="text-white text-sm">{new Date(selectedBooking.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contact Details */}
+                            <div className="border-t border-slate-700 pt-5">
+                                <h4 className="text-base font-semibold text-green-400 mb-3">Contact Details</h4>
+                                <div className="space-y-2.5 bg-slate-900/50 rounded-lg p-4">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Contact Name:</span>
+                                        <span className="text-white text-sm">{selectedBooking.contact_name || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Contact Phone:</span>
+                                        <span className="text-white text-sm">{selectedBooking.contact_phone || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400 text-sm">Contact Email:</span>
+                                        <span className="text-white text-sm">{selectedBooking.contact_email || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-5 border-t border-slate-700 flex gap-3">
+                            <button
+                                onClick={() => copyBookingDetails(selectedBooking)}
+                                className="btn btn-primary flex-1"
+                                style={{ marginTop: 0 }}
+                            >
+                                Copy All Details
+                            </button>
+                            <button
+                                onClick={closeBookingModal}
+                                className="btn flex-1"
+                                style={{ 
+                                    marginTop: 0,
+                                    background: 'transparent',
+                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    color: '#cbd5e1'
+                                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
